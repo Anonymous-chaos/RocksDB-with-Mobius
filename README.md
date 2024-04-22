@@ -19,6 +19,11 @@ Mobius Cache reuses the code of the original LRUCache, not yet at a production l
 1. Download the source code of RocksDB from https://github.com/facebook/rocksdb.
 2. Replace the files `./cache/lru_cache.h` and `./cache/lru_cache.cc`.
 3. Build RocksDB.
+   ```shell
+   $ mkdir build && cd build
+   $ cmake .. -DCMAKE_BUILD_TYPE=Release -DWITH_ZSTD=on
+   $ make -j
+  ```
 
 ## Reproduction
 
