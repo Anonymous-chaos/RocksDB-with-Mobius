@@ -486,14 +486,14 @@ Status LRUCacheShard::Insert(const Slice& key, uint32_t hash,
 
   // If the cache is full, try to evict an entry.
   else{
-
     LRUHandle* old = GetEvictionCandidate1();
-  
+
     // If evict successfully, this entry will be reused for the new value.
     if(old != nullptr){
       if(old->InCache() == true){
         table_.Remove(old->key(), old->hash);
       }
+
       usage_.FetchSub(old->total_charge);
       // Wait until the entry is not in use.
       while(old->HasRefs()){}
