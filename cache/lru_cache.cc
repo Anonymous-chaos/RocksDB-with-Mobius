@@ -99,24 +99,6 @@ LRUHandle* LRUHandleTable::Remove(const Slice& key, uint32_t hash) {
   return result;
 }
 
-LRUHandle* LRUHandleTable::Remove(LRUHandle* h) {
-  const Slice key = h->key();
-  uint32_t hash = h->hash;
-/************************************************************/
-  std::shared_mutex &rwlock_ = getLock(hash);
-  std::unique_lock<std::shared_mutex> lock(rwlock_);
-/************************************************************/
-  LRUHandle** ptr = FindPointer(key, hash);
-  LRUHandle* result = *ptr;
-  if(result != h || result == nullptr){
-    return nullptr;
-  }
-
-  result->SetInCache(false);
-  *ptr = result->next_hash;
-  elems_.FetchSub(size_t{1});
-  return result;
-}
 
 LRUHandle** LRUHandleTable::FindPointer(const Slice& key, uint32_t hash) {
   LRUHandle** ptr = &list_[hash >> (32 - length_bits_)];
@@ -504,17 +486,14 @@ Status LRUCacheShard::Insert(const Slice& key, uint32_t hash,
 
   // If the cache is full, try to evict an entry.
   else{
-    // printf("Try to evict\n");
-    // fflush(stdout);
 
     LRUHandle* old = GetEvictionCandidate1();
-    
-    // printf("Evict victim: %lx\n", (uint64_t)old);
-    // fflush(stdout);
-
+  
     // If evict successfully, this entry will be reused for the new value.
     if(old != nullptr){
-      table_.Remove(old->key(), old->hash);
+      if(old->InCache() == true){
+        table_.Remove(old->key(), old->hash);
+      }
       usage_.FetchSub(old->total_charge);
       // Wait until the entry is not in use.
       while(old->HasRefs()){}
