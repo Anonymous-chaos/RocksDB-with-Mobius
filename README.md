@@ -11,7 +11,7 @@ This repository contains code for Mobius Cache in RocksDB. Mobius Cache is an al
 ## Introduction
 Mobius Cache reuses the code of the original LRUCache, not yet at a production level. We made the following changes to the original code:
 
-1. Insert a shared-lock pool into the Hashtable, making it thread-safe. The modified hashtable is in a fixed size ($2^17$) after initialization.
+1. Insert a shared-lock pool into the Hashtable, making it thread-safe. The modified hashtable is in a fixed size ($2^{17}$) after initialization.
 2. No longer free the memory of evicted cache entries. Instead, re-assign new data to the entries for reuse. This is to avoid awful dangling pointers in multi-threaded scenarios.
 3. Replace the cache behaviors of LRU with that of Mobius, including Insert, Lookup, Erase, Ref, and Release. All those behaviors keep thread safety using atomic operations and CAS.
 
